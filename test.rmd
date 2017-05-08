@@ -1,0 +1,108 @@
+---
+title: "Exploring RMarkdown using Climate Data"
+author: "Dannique Aalbu"
+date: "April 28, 2017"
+output: 
+  html_document: default
+  ioslides_presentation: default
+  pdf_document: default
+  slidy_presentation: null
+subtitle: Environmental Informatics
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo <- TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+#Given a set of climate data for 1942 to 2016, we can explore a variety of trends. 
+
+##Trend 1: Total Monthly Precipitation 
+```{r climate, echo=TRUE, eval=TRUE}
+climate <- read.table("clim.txt", header=TRUE)
+clim.MonthlyRain <- aggregate(climate[,c("rain")], by = list(climate$month, climate$year), sum)
+colnames(clim.MonthlyRain)=c("Month","Year","Rain")
+par(mar=c(5,4,4,2))
+boxplot(clim.MonthlyRain$Rain~clim.MonthlyRain$Month,
+        ylab="Rain(inches)",
+        xlab="Month", col="blue")
+```
+
+##Trend 2: Average Monthly Temperature
+```{r climate2, echo=TRUE, eval=TRUE}
+clim.tAve <- (climate$tmax + climate$tmin)/2
+par(mar=c(5,4,4,2))
+boxplot(clim.tAve~climate$month,
+        ylab="Average Temperature(degrees Celcius)",
+        xlab="Month", col="red")
+```
+
+##Trend 3: The Wettest Year on Record 
+```{r climate3, echo=TRUE, eval=TRUE}
+clim.YearlyRain <- aggregate(climate[,c("rain")],by = list(climate$year), sum) 
+colnames(clim.YearlyRain)=c("Year","Rain")
+Wettest <- which.max(clim.YearlyRain$Rain)
+clim.YearlyRain[Wettest,c("Year")]
+```
+
+##Trend 4: The Driest Year on Record
+```{r climate4, echo=TRUE, eval=TRUE}
+Driest <- which.min(clim.YearlyRain$Rain)
+clim.YearlyRain[Driest,c("Year")]
+```
+
+#Some of these trends can be further visualized through photographs. 
+##The Owens River in a Wet Year {.flexbox .vcenter}
+<div align="center">
+<img src="wet_owens.jpg" height=500>
+</div>
+
+
+##The Owens River in a Dry Year {.flexbox .vcenter}
+<div align="center">
+<img src="dry_Owens.jpg" height=500>
+</div>
+
+#Trends can also be broken down by season.
+```{r climate5, include=FALSE}
+climate$season = ifelse(climate$month %in% c(12,1,2),1, ifelse(climate$month %in% c(3:5),2, ifelse(climate$month %in% c(6:8),3,4)))
+climate.byseason = with(climate, aggregate(climate, by=list(year,season), mean))
+climate.spring = subset(climate.byseason, climate.byseason$season==1)
+climate.summer = subset(climate.byseason, climate.byseason$season==2)
+climate.fall = subset(climate.byseason, climate.byseason$season==3)
+climate.winter = subset(climate.byseason, climate.byseason$season==4)
+```
+
+##Trend 5: The Wettest Season 
+```{r climate6, echo=TRUE, eval=TRUE}
+WettestSeason <- which.max(climate.byseason$rain)
+climate.byseason[WettestSeason,c("season")]
+```
+Winter is the Wettest Season.
+
+##Trend 6: The Driest Season 
+```{r climate7, echo=TRUE, eval=TRUE}
+DriestSeason <- which.min(climate.byseason$rain)
+climate.byseason[DriestSeason,c("season")]
+```
+Summer is the Driest Season.
+
+##Trend 7: The Relationship between Winter Precipitation and Summer Temperature
+```{r ggplot, echo=FALSE}
+WinterRain <- climate.winter$rain
+SummerTemp <- climate.summer$tmax
+  RainTemp <- ggplot(mapping=aes(x=WinterRain,y=SummerTemp))+
+  geom_point(col="purple", size=4)+
+  geom_smooth(method="lm")+ 
+  xlab("Winter Rain(inches)")+ 
+  ylab("Summer Temperature(degrees Celcius)")
+    return(RainTemp)
+``` 
+
+This graph expresses the relationship between Winter Precipitation and Summer Temperature. Radiative forcing alters heating which directly effects evaporation and sensible heating at the Earth's surface. In addition, increases in temperature lead to increases in the moisture-holding capacity of the atmosphere. Together, these effects alter the hydrological cycle, especially characteristics of precipitation and extremes. Hence, overall, this relationship can provide insight into patterns of the earth system that can be used to better understand shifts in climate.  
+
+This information was gathered from the IPPC Fourth Assessment Report: Climate Change 2007: [IPCC Website](https://www.ipcc.ch/publications_and_data/ar4/wg1/en/ch3s3-3.html)
+
+
+
