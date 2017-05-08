@@ -1,7 +1,7 @@
 ---
 title: "Exploring RMarkdown using Climate Data"
 author: "Dannique Aalbu"
-date: "April 28, 2017"
+date: "May 8, 2017"
 output: 
   html_document: default
   ioslides_presentation: default
