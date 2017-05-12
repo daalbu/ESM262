@@ -1,0 +1,96 @@
+---
+title: "Assigment2"
+author: "Dannique Aalbu"
+date: "May 11, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+#Part 1: Importing & Tidying the California Gazetteer Dataset
+
+## Read in a delimited text file ad saves it as a tibble
+
+```{r Part1.1}
+CAdata <- read_delim("CA_Features_20170401.txt", delim = "|")
+gaz_raw <- as_tibble(CAdata)
+```
+
+## Formatting the tibble to include the desired columns and change the column names
+
+```{r Part1.2}
+gaz_tibble <- tibble(
+  "Feature_ID" = gaz_raw$`<U+FEFF>FEATURE_ID`,
+  "Feature_Name" = gaz_raw$FEATURE_NAME,
+  "Feature_Class" = gaz_raw$FEATURE_CLASS,
+  "State_Alpha" = gaz_raw$STATE_ALPHA,
+  "County_Name" = gaz_raw$COUNTY_NAME,
+  "Primary_Latitude" = gaz_raw$PRIM_LAT_DEC,
+  "Primary_Longitude" = gaz_raw$PRIM_LONG_DEC,
+  "Source_Latitude" = gaz_raw$SOURCE_LAT_DEC,
+  "Source_Longitude" = gaz_raw$SOURCE_LONG_DEC,
+  "Elevation_meters" = gaz_raw$ELEV_IN_M,
+  "Map_Name" = gaz_raw$MAP_NAME,
+  "Date_Created" = gaz_raw$DATE_CREATED,
+  "Date_Edited" = gaz_raw$DATE_EDITED
+)
+```
+
+##Changing the columns containing dates to a date format and convert any placeholders for unknown data to NA
+```{r Part1.3}
+gaz_tibble %>%
+  mutate(Primary_Longitude = as.character(Primary_Longitude),Date_Created = as.Date(Date_Created, format = '%m/%d/%Y'),Date_Edited = as.Date(Date_Edited, format = '%m/%d/%Y')) 
+gaz_tibble$Primary_Latitude <- parse_character(gaz_tibble$Primary_Latitude, na = "0")   
+gaz_tibble$Map_Name <- parse_character(gaz_tibble$Map_Name, na = "Unknown") 
+```
+
+##Deleting rows where the primary latitude or longitude are unknown
+```{r Part1.4}
+gaz_tibble <- gaz_tibble %>%
+  filter(Primary_Latitude != "NA") %>% 
+  filter(State_Alpha == "CA")
+View(gaz_tibble)
+```
+
+##Writing the gaz tibble to CSV file
+```{r Part1.5}
+write_delim(gaz_tibble, "GAZ.csv", delim = "|")
+```
+
+#Part 2: Data Analysis
+
+##Question: what is the most commonly occurring feature name?
+```{Part 2.1}
+counter = count(gaz_tibble,Feature_Name,sort = TRUE)
+common_feature <- which.max(counter$n)
+counter[common_feature,c("Feature_Name")]
+```
+
+##Question: what is the least commonly occuring feature class?
+```{Part 2.2}
+counter2 = count(gaz_tibble,Feature_Class,sort = TRUE)
+common_class <- which.min(counter2$n)
+counter2[common_class,c("Feature_Class")]
+```
+
+##Question: what is the approximate center point of each county?
+```{Part 2.3}
+by_county <- gaz_tibble %>% 
+  group_by(County_Name) %>%
+  summarize(Min_lat = min(Primary_Latitude,na.rm = TRUE), Max_lat = max (Primary_Latitude, na.rm = TRUE), Min_long = min(Primary_Longitude, na.rm = TRUE), Max_long = max(Primary_Longitude, na.rm = TRUE)) %>%
+  mutate(Min_lat = as.double(Min_lat), Min_long = as.double(Min_long), Max_lat = as.double(Max_lat), Max_long = as.double(Max_long)) %>%
+mutate(xCenter = (Min_long + Max_long)/2) %>%
+mutate(yCenter = (Min_lat + Max_lat)/2) 
+#print the county names and the center point
+print(subset(by_county, select = c(1, 6, 7)))
+```
+
+##Question: which features in each county are man-made?
+```{Part 2.4}
+by_features <- select(gaz_tibble,Feature_Class) %>%
+mutate(Feature_Type = if_else(Feature_Class %in% c("Area","Arroyo","Bar","Bench","Bend","Park","Valley","Stream","Spring","Summit","Cape","Cave","Plain","Flat","Ridge","Woods","Beach","Lake","Bay","Channel","Island","Basin","Cliff","Arch","Pillar","Crater","Falls","Forest","Gap","Glacier","Gut","Isthmus","Lava","Range","Rapids","Sea","Slope","Swamp"),"Natural","Man-Made"))
+print(by_features)
+```
