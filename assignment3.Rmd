@@ -1,0 +1,66 @@
+---
+title: "Assignment 3"
+author: "Dannique Aalbu"
+date: "May 18, 2017"
+output: html_document
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#read in data
+thinshallow <- read.table("resthin.shallow.txt", header=T)
+thindeep <- read.table("resthin.deep.txt", header=T)
+clim <- read.table("sierraclim.txt",header=T)
+#make sure you have libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+library(lubridate)
+```
+
+#**Exploring trends in climate data using ggplot.**
+
+##Monthly aggregated data showing maximum daily temperature from 1941-2013
+```{r plot1, echo=TRUE}
+p1 <- ggplot(clim, aes(x=year, y=tmax)) + stat_summary(fun.y="mean", geom="point", col="firebrick2", size=3)+theme(axis.text=element_text(size=12))+labs(x = "Year", y = expression(paste("Maximum Temperature   ",C**degree)))+theme(axis.title=element_text(face ="bold",size=14))
+p1
+```
+
+```{r season, echo=FALSE, results='hide',warning=FALSE}
+clim$season <- ifelse(clim$month %in% c(12,1,2),1, ifelse(clim$month %in% c(3:5),2, ifelse(clim$month %in% c(6:8),3,4)))
+clim.byseason <- with(clim, aggregate(clim, by=list(year,season), mean))
+clim.spring <- subset(clim.byseason, clim.byseason$season==1)
+clim.summer <- subset(clim.byseason, clim.byseason$season==2)
+clim.fall <- subset(clim.byseason, clim.byseason$season==3)
+clim.winter <- subset(clim.byseason, clim.byseason$season==4)
+```
+
+##Maximum daily temperature trends by season from 1941-2013
+```{r plot2, echo=TRUE}
+p2 <- ggplot(clim.byseason, aes(x=year, y=tmax, col=factor(season)))+ geom_point( aes(col=factor(season)), size=3) +geom_smooth(method="lm")+
+  scale_colour_manual(name="Season", labels=c("Winter","Spring","Summer", "Fall"), values=c("blue","green","yellow","orange"))+
+  labs(x = "Year", y = expression(paste("Maximum Temperature  ",C**degree)))+
+  theme(axis.title=element_text(size=14, face="bold"))
+p2
+```
+
+##Use of "facet" to show differences in plant carbon recovery by decade based on the 4 thinning intensities
+
+###*For deep thinning* 
+```{r plot3, echo=TRUE}
+#color plant carbon by decade/scenario where scen refers to the decade
+p3 <- ggplot(thindeep, aes(x=wy, y=plantc, col=as.factor(scen)))+ stat_summary(fun.y="mean",geom="line", size =2, aes(col=as.factor(scen))) +facet_wrap(~as.factor(thin))+scale_color_brewer(type="qual", palette="Set1", name="Decade")+labs(x = "Water Year", y = "Plant Carbon")+
+  theme(axis.title=element_text(size=14, face="bold"))
+p3
+```
+
+###*And for shallow thinning* 
+```{r plot4, echo=TRUE}
+p4 <- ggplot(thinshallow, aes(x=wy, y=plantc, col=as.factor(scen)))+ stat_summary(fun.y="mean",geom="line", size =2, aes(col=as.factor(scen))) +facet_wrap(~as.factor(thin))+scale_color_brewer(type="qual", palette="Set2", name="Decade")+labs(x = "Water Year", y = "Plant Carbon")+
+  theme(axis.title=element_text(size=14, face="bold"))
+p4
+```
+
+
+
