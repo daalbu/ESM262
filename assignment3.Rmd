@@ -45,19 +45,19 @@ p2 <- ggplot(clim.byseason, aes(x=year, y=tmax, col=factor(season)))+ geom_point
 p2
 ```
 
-##Use of "facet" to show differences in plant carbon recovery by decade based on the 4 thinning intensities
+##Use of "facet" to show differences in transpiration by decade based on the 4 thinning intensities
 
 ###*For deep thinning* 
 ```{r plot3, echo=TRUE}
-#color plant carbon by decade/scenario where scen refers to the decade
-p3 <- ggplot(thindeep, aes(x=wy, y=plantc, col=as.factor(scen)))+ stat_summary(fun.y="mean",geom="line", size =2, aes(col=as.factor(scen))) +facet_wrap(~as.factor(thin))+scale_color_brewer(type="qual", palette="Set1", name="Decade")+labs(x = "Water Year", y = "Plant Carbon")+
+#color trans by decade/scenario where scen refers to the decade
+p3 <- ggplot(thindeep, aes(x=wy, y=trans, col=as.factor(scen)))+ stat_summary(fun.y="mean",geom="line", size =2, aes(col=as.factor(scen))) +facet_wrap(~as.factor(thin))+scale_color_brewer(type="qual", palette="Set1", name="Decade")+labs(x = "Water Year", y = "Transpiration")+
   theme(axis.title=element_text(size=14, face="bold"))
 p3
 ```
 
 ###*And for shallow thinning* 
 ```{r plot4, echo=TRUE}
-p4 <- ggplot(thinshallow, aes(x=wy, y=plantc, col=as.factor(scen)))+ stat_summary(fun.y="mean",geom="line", size =2, aes(col=as.factor(scen))) +facet_wrap(~as.factor(thin))+scale_color_brewer(type="qual", palette="Set2", name="Decade")+labs(x = "Water Year", y = "Plant Carbon")+
+p4 <- ggplot(thinshallow, aes(x=wy, y=trans, col=as.factor(scen)))+ stat_summary(fun.y="mean",geom="line", size =2, aes(col=as.factor(scen))) +facet_wrap(~as.factor(thin))+scale_color_brewer(type="qual", palette="Set2", name="Decade")+labs(x = "Water Year", y = "Transpiration")+
   theme(axis.title=element_text(size=14, face="bold"))
 p4
 ```
