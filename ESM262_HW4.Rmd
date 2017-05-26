@@ -1,0 +1,149 @@
+---
+title: "ESM 262 HW4: Functions"
+author: "Dannique Albu and Alex Tremblay"
+date: "May 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#packages:
+library(tidyr)
+```
+###Sample Data:
+```{r sample data, echo=TRUE}
+#example prices
+salmon.price <- 15
+halibut.price <- 40
+shark.price <- 100
+tuna.price <- 200
+cod.price <- 10
+
+#example catch data
+sd.catch <- c(30,40,5,60,70)
+baja.catch <- c(35,90,6,65,78)
+sb.catch <- c(42,54,8,73,28)
+sf.catch <- c(81,40,5,63,77)
+```
+###Function Code:
+```{r function, echo=TRUE}
+#function that takes two fish tables as inputs 
+Fishies = function(fishPrice,fishCatch) { 
+
+  #price table
+  price = c(salmon.price,halibut.price,shark.price,tuna.price,cod.price)
+  fishPrice = data.frame(price=price)
+  FishSpecies <- rownames(fishPrice) <- c("salmon","halibut","shark","tuna","cod")
+  colnames(fishPrice) <- ("Price($)")
+  View(fishPrice)
+  
+  #catch table
+  fishCatch = data.frame(cbind(sd.catch,baja.catch,sb.catch,sf.catch))
+  locations <- c("San Diego","Baja","Santa Barbara","San Francisco")
+  colnames(fishCatch) <-locations
+  rownames(fishCatch) <- c("salmon","halibut","shark","tuna","cod")
+  View(fishCatch)
+  
+  #calculate most frequently caught fish in each location
+  #need to return the fish species associated with max catch in each locaiton
+  MaxCatch <- rownames(fishCatch)[apply(fishCatch,2,which.max)]
+  print("The most frequently caught fish in San Diego, Baja, Santa Barbara, & San Francisco are as follows: ")
+  print(MaxCatch)
+  
+  #calculate total revenue for each location, starting with San Diego
+  TotalRevenueSD <- sum(sd.catch*price)
+  TotalRevenueSD <- as.character(TotalRevenueSD)
+  print(paste0("The total revenue for San Diego is: $",TotalRevenueSD,"."))
+  
+  #total revenue for Baja
+  TotalRevenueBaja <- sum(baja.catch*price)
+  print(paste0("The total revenue for Baja is: $",TotalRevenueBaja,"."))
+  
+  #total revenue for Santa Barbara
+  TotalRevenueSB <- sum(sb.catch*price)
+  print(paste0("The total revenue for Santa Barbara is: $",TotalRevenueSB,"."))
+  
+  #total revenue for San Francisco
+  TotalRevenueSF <- sum(sf.catch*price)
+  print(paste0("The total revenue for San Francisco is: $",TotalRevenueSF,"."))
+  
+  #generate a total fishies sum
+  FishRevenues <- as.integer(c(TotalRevenueSD,TotalRevenueBaja,TotalRevenueSB,TotalRevenueSF))
+  FishMoney <- sum(FishRevenues)
+  print(paste0("The total revenue for all four locations is: $",FishMoney,"."))
+  
+  #user requested graph of revenvue by location
+  decision <- readline(prompt="Would you like to see a graph of total revenue by location(Y/N)?")
+  
+  if(decision == "Y"){
+    Totals<-cbind(TotalRevenueSD,TotalRevenueBaja,TotalRevenueSB,TotalRevenueSF)
+    colnames(Totals)<-c("San Diego","Baja","Santa Barbara","San Francisco")
+    rownames(Totals)<-c("Revenue")
+    barplot(Totals,
+            col = "green3",
+            width = 3,
+            border = "black",
+            ylab = "Revenue ($)",
+            main = "Total Revenue by Fishing Location")
+  }
+} 
+```
+###Prompts Output:
+```{r prompts outout, echo=FALSE}
+#price table
+  price = c(salmon.price,halibut.price,shark.price,tuna.price,cod.price)
+  fishPrice = data.frame(price=price)
+  FishSpecies <- rownames(fishPrice) <- c("salmon","halibut","shark","tuna","cod")
+  colnames(fishPrice) <- ("Price($)")
+  View(fishPrice)
+  
+  #catch table
+  fishCatch = data.frame(cbind(sd.catch,baja.catch,sb.catch,sf.catch))
+  locations <- c("San Diego","Baja","Santa Barbara","San Francisco")
+  colnames(fishCatch) <-locations
+  rownames(fishCatch) <- c("salmon","halibut","shark","tuna","cod")
+  View(fishCatch)
+  
+  #calculate most frequently caught fish in each location
+  #need to return the fish species associated with max catch in each locaiton
+  MaxCatch <- rownames(fishCatch)[apply(fishCatch,2,which.max)]
+  print("The most frequently caught fish in San Diego, Baja, Santa Barbara, & San Francisco are as follows: ")
+  print(MaxCatch)
+  
+  #calculate total revenue for each location, starting with San Diego
+  TotalRevenueSD <- sum(sd.catch*price)
+  TotalRevenueSD <- as.character(TotalRevenueSD)
+  print(paste0("The total revenue for San Diego is: $",TotalRevenueSD,"."))
+  
+  #total revenue for Baja
+  TotalRevenueBaja <- sum(baja.catch*price)
+  print(paste0("The total revenue for Baja is: $",TotalRevenueBaja,"."))
+  
+  #total revenue for Santa Barbara
+  TotalRevenueSB <- sum(sb.catch*price)
+  print(paste0("The total revenue for Santa Barbara is: $",TotalRevenueSB,"."))
+  
+  #total revenue for San Francisco
+  TotalRevenueSF <- sum(sf.catch*price)
+  print(paste0("The total revenue for San Francisco is: $",TotalRevenueSF,"."))
+  
+  #generate a total fishies sum
+  FishRevenues <- as.integer(c(TotalRevenueSD,TotalRevenueBaja,TotalRevenueSB,TotalRevenueSF))
+  FishMoney <- sum(FishRevenues)
+  print(paste0("The total revenue for all four locations is: $",FishMoney,"."))
+  
+  #user requested graph of revenvue by location
+  decision <- readline(prompt="Would you like to see a graph of total revenue by location(Y/N)?")
+```
+###Graph:
+```{r graph, echo=FALSE}
+ Totals<-cbind(TotalRevenueSD,TotalRevenueBaja,TotalRevenueSB,TotalRevenueSF)
+    colnames(Totals)<-c("San Diego","Baja","Santa Barbara","San Francisco")
+    rownames(Totals)<-c("Revenue")
+    barplot(Totals,
+            col = "green3",
+            width = 3,
+            border = "black",
+            ylab = "Revenue ($)",
+            main = "Total Revenue by Fishing Location")
+```
